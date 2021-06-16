@@ -86,7 +86,7 @@ private:
     int myTextAlignment = TEXT_ALIGN_LEFT;
     int myColor = WHITE;
     byte lastChar;
-    const char *myFontData = URW_Gothic_L_Book_14;
+    const char *myFontData = URW_Gothic_L_Book_10;
 
 public:
     // For SPI display: create the display object connected to SPI pins and RST, DC and CS
@@ -143,6 +143,8 @@ public:
     void drawSine(float offset);
 
     void drawGrid();
+    
+    void drawLFOGrid(int pos);
 
     // Fill the rectangle
     void fillRect(int x, int y, int width, int height);

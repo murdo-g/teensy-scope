@@ -452,28 +452,41 @@ void SH1106::drawSine(float offset)
 
 void SH1106::drawGrid()
 {
-    // for (int col=0; col <= 130; col += 32) {
-    //     for (int row=0; row <= 64; row += 4){
-    //         setPixel(col,row);
-    //     }
-    // }
-        for (int row=0; row <= 64; row += 4){
-            setPixel(64,row);
-            // setPixel(100,row);
-            // setPixel(110,row);
-            // setPixel(28,row);
-            // setPixel(18,row);
-            
-        }
-
-    // for (int col=4; col <= 64; col += 16) {
-    //     for (int row=2; row <= 128; row += 4){
-    //         setPixel(row,col);
-    //     }
-    // }
+    for (int col=0; col <= 130; col += 1) {
+            setPixel(col,0);
+            setPixel(col,63);
+    }
+    
+    for (int row=0; row <= 64; row += 4){
+        setPixel(64,row);
+    }
+    for (int row=0; row <= 64; row += 1){
+        setPixel(0,row);
+        setPixel(127,row);
+    }
 
     for (int row=2; row <= 128; row += 4){
         setPixel(row,32);
+    }
+}
+
+void SH1106::drawLFOGrid(int pos)
+{
+    for (int col=0; col <= 90; col += 1) {
+            setPixel(col,0);
+            setPixel(col,63);
+    }
+    
+    // for (int row=0; row <= 64; row += 4){
+    //     setPixel(45,row);
+    // }
+    for (int row=0; row <= 64; row += 1){
+        setPixel(0,row);
+        setPixel(90,row);
+    }
+
+    for (int row=2; row <= 90; row += 4){
+        setPixel(row,pos);
     }
 }
 
