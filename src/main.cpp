@@ -26,7 +26,7 @@ const int refreshPeriod = 30000; // us
 
 ADC *adc = new ADC(); // adc object
 
-IntervalTimer timer0, timer1;
+IntervalTimer timer0, timer1, timer2;
 
 uint8_t in_buffer_0[BUFFER_SIZE];
 int in_buffer_0_count = 0;
@@ -45,15 +45,20 @@ elapsedMillis timebaseUpdate = 0;
 
 int startTimerValue0 = 0, startTimerValue1 = 0;
 
-bool lfoMode = true;
+
+/* LFO CONSTANTS */
+bool lfoMode = false;
 float lfoBuffer[100];
 int lfoBufferCount = 0;
 elapsedMillis lfoTimer = 0;
 float lfoMax = -3, lfoMin = 3;
 
+/* Timebase */
+int timeBaseDiv = 1;
+
 void updateDisplayLFO(uint8_t *buffer)
 {
-    if (lfoTimer > 50)
+    if (lfoTimer > 60)
     {
         float value = 0;
         for (int i = 0; i < BUFFER_SIZE; i++)
@@ -101,10 +106,11 @@ void updateDisplayLFO(uint8_t *buffer)
 
 void updateDisplay(uint8_t *buffer, uint8_t *ext_buffer)
 {
+    
     int centre = 0;
     display.clear();
 
-    for (int x = 128; x < (BUFFER_SIZE - 128); x++)
+    for (int x = 64*timeBaseDiv; x < (BUFFER_SIZE - 64*timeBaseDiv); x++)
     {
         float value = ext_buffer[x] * 0.2;
         float value2 = ext_buffer[x + 1] * 0.2;
@@ -119,7 +125,8 @@ void updateDisplay(uint8_t *buffer, uint8_t *ext_buffer)
     {
         for (int column = 0; column < 127; column++)
         {
-            display.drawLine(column, (64 - buffer[centre - 128 + column * 2] / 4), column + 1, (64 - buffer[centre - 128 + (column + 1) * 2] / 4));
+            display.drawLine(column, (64 - buffer[centre - 64*timeBaseDiv + column * timeBaseDiv] / 4), 
+                column + 1, 64-buffer[centre - 64*timeBaseDiv + (column+1)*timeBaseDiv] / 4);
         }
         display.drawGrid();
         display.updateDisplay();
@@ -129,6 +136,34 @@ void updateDisplay(uint8_t *buffer, uint8_t *ext_buffer)
         for (int column = 0; column < 127; column++)
         {
             display.drawLine(column, (64 - buffer[64 + column] / 5), column + 1, (64 - buffer[64 + column + 1] / 5));
+        }
+        display.drawGrid();
+        display.updateDisplay();
+    }
+}
+
+void updateDisplayXY(uint8_t *xbuffer, uint8_t *ybuffer)
+{
+    int centre = 0;
+    display.clear();
+
+    for (int x = 64; x < (BUFFER_SIZE - 64); x++)
+    {
+        float value = xbuffer[x] * 0.2;
+        float value2 = xbuffer[x + 1] * 0.2;
+        if ((value < 30) && (value2 > 30))
+        {
+            centre = x;
+            latchTimeout = 0;
+            break;
+        }
+    }
+    if (centre != 0)
+    { 
+        display.clear();
+        for(int x = 1; x < 128; x++){
+            display.drawLine(128 - xbuffer[centre - 64 + x]/2, 60 - ybuffer[centre - 64 + x]/4, 
+                128 - xbuffer[centre - 64 + x - 1]/2, 60 - ybuffer[centre - 64 + x -1]/4);
         }
         display.drawGrid();
         display.updateDisplay();
@@ -258,22 +293,36 @@ char c = 0;
 
 void loop()
 {
+    // if (lfoMode)
+    // {
+    //     updateDisplayLFO(in_buffer_0);
+    // }
 
-    if (lfoMode)
-    {
-        updateDisplayLFO(in_buffer_0);
-    }
-
-    else
-    {
-        if (in_buffer0Ready)
+    // else
+    // {
+    //     if (in_buffer0Ready)
+    //     {
+    //         updateDisplay(in_buffer_0, ext_buffer_0);
+    //     }
+    //     if (!in_buffer0Ready)
+    //     {
+    //         updateDisplay(in_buffer_1, ext_buffer_1);
+    //     }
+    //     delayMicroseconds(refreshPeriod);
+    // }
+    // if(timebaseUpdate > 2000){
+    //     timebaseUpdate = 0;
+    //     timeBaseDiv ++;
+    //     timeBaseDiv -= 3*(timeBaseDiv >=4);
+    // }
+    if (in_buffer0Ready)
         {
-            updateDisplay(in_buffer_0, ext_buffer_0);
+            updateDisplayXY(in_buffer_0, ext_buffer_0);
         }
         if (!in_buffer0Ready)
         {
-            updateDisplay(in_buffer_1, ext_buffer_1);
+            updateDisplayXY(in_buffer_1, ext_buffer_1);
         }
-        delayMicroseconds(refreshPeriod);
-    }
+    // delayMicroseconds(refreshPeriod);
+    
 }
